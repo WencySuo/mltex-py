@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run MathLens Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/packages/client",
+        "${workspaceFolder}/examples"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/packages/client/dist/**/*.cjs",
+        "${workspaceFolder}/packages/server/dist/**/*.cjs"
+      ],
+      "preLaunchTask": "npm: build"
+    }
+  ]
+}
