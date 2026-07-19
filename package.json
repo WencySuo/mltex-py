@@ -10,7 +10,7 @@
     "node": ">=18.18.0"
   },
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w @mathlens/core -w @mathlens/server -w @mathlens/webview -w mathlens --if-present",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "echo \"lint: no linter configured yet (see CONTRACTS.md) — intentionally a no-op\""

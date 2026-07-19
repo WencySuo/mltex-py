@@ -22,6 +22,13 @@ await build({
   sourcemap: true,
   // web-tree-sitter loads its wasm at runtime; keep node builtins external-by-platform.
   logLevel: 'info',
+  // web-tree-sitter's emscripten glue reads import.meta.url to locate itself;
+  // in a CJS bundle esbuild lowers import.meta.url to undefined, which breaks
+  // Parser.init with ERR_INVALID_ARG_VALUE. Map it to __filename instead.
+  define: { 'import.meta.url': 'import_meta_url' },
+  banner: {
+    js: "const import_meta_url = require('node:url').pathToFileURL(__filename).href;",
+  },
 });
 
 // Copy wasm binaries next to the bundle.
