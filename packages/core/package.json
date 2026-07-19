@@ -1,0 +1,23 @@
+{
+  "name": "@mathlens/core",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MathLens core: parse, MathIR, translate, naming, callgraph, emit. ZERO vscode/LSP dependencies.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./protocol": "./src/protocol.ts",
+    "./panelProtocol": "./src/panelProtocol.ts"
+  },
+  "scripts": {
+    "build": "node scripts/copy-wasm.mjs && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "tree-sitter-python": "^0.25.0",
+    "web-tree-sitter": "^0.25.10"
+  }
+}

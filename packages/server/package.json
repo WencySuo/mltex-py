@@ -1,0 +1,19 @@
+{
+  "name": "@mathlens/server",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MathLens language server (LSP).",
+  "type": "module",
+  "main": "./dist/server.cjs",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mathlens/core": "0.0.1",
+    "mathjax-full": "^3.2.2",
+    "vscode-languageserver": "^10.1.0",
+    "vscode-languageserver-textdocument": "^1.0.12"
+  }
+}

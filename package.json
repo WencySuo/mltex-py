@@ -1,0 +1,24 @@
+{
+  "name": "mathlens-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "description": "MathLens — renders Python linear-algebra / PyTorch code as LaTeX mathematics.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "echo \"lint: no linter configured yet (see CONTRACTS.md) — intentionally a no-op\""
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.130",
+    "esbuild": "^0.25.10",
+    "typescript": "~5.9.3",
+    "vitest": "^2.1.9"
+  }
+}

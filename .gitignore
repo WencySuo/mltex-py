@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.tsbuildinfo
+packages/client/media/webview.js
+packages/client/media/webview.js.map
+packages/client/server/
+packages/core/wasm/*.wasm
+.DS_Store
+*.log

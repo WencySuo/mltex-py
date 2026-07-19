@@ -42,8 +42,11 @@ to let a user move fluidly between a Python statement and its mathematical meani
 **Non-goals (MVP):**
 
 - Executing user code in any form (no runtime, no import of user modules).
-- Full Python semantic analysis / type checking — we do our own lightweight, targeted
-  inference; we are not building or embedding Pyright.
+- Shape/type inference of our own. Shape and type facts are **ingested, not computed**
+  (§6.6): declared sources (jaxtyping annotations, shape comments, einops/einsum
+  strings) in the MVP; delegated and observed sources (Pyright sidecar, PyTorch
+  FakeTensor tracing, DAP) as stretch providers. Our own "inference" never exceeds
+  one-step propagation across an operator we already model for rendering.
 - Being a general LaTeX editing extension. We *mimic LaTeX Workshop's rendering
   qualities* (hover math, live preview, PDF build + viewer); we do not replicate its
   LaTeX-authoring features (completion, linting of .tex, BibTeX, …).
@@ -65,20 +68,25 @@ to let a user move fluidly between a Python statement and its mathematical meani
 | F5 | Two-column literate view + PDF export | #5 |
 | F6 | Control-flow QoL: loops → Σ/Π/indexed blocks, if → piecewise cases, comprehensions, robust fallback | cross-cutting |
 | F7 | Notation control: `# tex:` directives, project mapping file, preamble file | cross-cutting |
+| F8 | Declared-shape ingestion: jaxtyping annotations, shape comments, einops/einsum strings → signature lines + shape underbraces | #6 (declared half) |
 
 ### Stretch (design-for, don't build)
 
 | Feature | Brainstorm ref |
 |---|---|
-| Static shape propagation + mismatch diagnostics (red dimensions) | #6 |
+| Pyright sidecar: tensor-ness/dtype facts for translation quality (`*` disambiguation) | #6 (delegated) |
+| FakeTensor dry-run provider: exact shapes/dtypes/devices via meta tensors, opt-in | #6 (observed) |
+| One-step shape propagation + mismatch display (red dimensions) over ingested facts | #6 |
 | Breakpoint-aware math via DAP (runtime shapes/dtypes/devices) | #7 |
 | Value substitution for small tensors; stats badges + NaN provenance | #8, #9 |
 | Execution-trace PDF | #10 |
 | Gradient-flow rendering | #11 |
 | Math-rendered watch expressions | #12 |
 
-Static shape propagation is listed as stretch but is the **first** stretch item and the
-one the MVP most actively prepares for (see §5 Annotations and §10).
+Shape awareness is deliberately split: the **declared** half (F8) is MVP because it is
+pure parsing; everything requiring inference or execution is stretch, and even then it
+is delegated to existing tools rather than built (§6.6). That split is our main defense
+against becoming a glorified type checker.
 
 ---
 
@@ -252,13 +260,15 @@ interface AnnotationProvider {
 }
 ```
 
-- MVP ships **one provider**: `StaticNoteProvider` (directive-sourced notes) — and the
-  panel/PDF render annotation badges generically (underbraces for `shape`, margin
-  badges for `stats`, red tint for `note:error`).
+- MVP ships **two providers**: `StaticNoteProvider` (directive-sourced notes) and
+  `DeclaredShapeProvider` (jaxtyping / shape comments / einops strings, §6.6 Tier 1) —
+  and the panel/PDF render annotation badges generically (underbraces for `shape`,
+  margin badges for `stats`, red tint for `note:error`).
 - Stretch items are all "new provider, zero translator changes":
-  static shape inference → `StaticShapeProvider`; breakpoint integration →
-  `DapAnnotationProvider` living in the **client** (it has DAP access), pushing
-  annotations to the panel over the existing message bridge.
+  `PyrightFactsProvider` (delegated class/dtype facts, §6.6 Tier 2);
+  `FakeTensorProvider` (observed shapes via meta-tensor dry-run, §6.6 Tier 3);
+  breakpoint integration → `DapAnnotationProvider` living in the **client** (it has
+  DAP access), pushing annotations to the panel over the existing message bridge.
 - **Rule enforced by review:** no MVP code may branch on `origin`. Renderers treat
   static and runtime annotations identically (styling may differ via CSS class only).
 
@@ -410,6 +420,63 @@ neighbors unaffected.** A 60-line function with logging, `.to(device)`, and asse
 must still yield a clean 12-equation derivation with three small `\texttt{…}` inserts.
 Every fallback logs a structured reason (feeds the golden-corpus backlog).
 
+### 6.6 Shape & type facts: ingest, don't infer
+
+Prior art settles the strategy. Whole-program static shape inference for
+PyTorch has been attempted repeatedly — PyTea (Z3 constraint solving), ShapeFlow,
+DeepMind's `tensor-annotations` stubs — and every one is a dormant research prototype.
+Even PEP 646 (variadic generics, motivated by exactly this) hasn't produced checkable
+shapes, because PyTorch's own stubs don't parameterize `Tensor` by shape, so
+Pyright/mypy cannot check dims regardless. What *did* win is **declared shapes**:
+jaxtyping (`Float[Tensor, "batch seq dim"]`) is the de-facto standard (torchtyping
+deprecated itself in its favor). Conclusion: we never build an inference engine; we
+ingest facts from sources ordered by cost.
+
+**Tier 1 — Declared (MVP, F8).** Pure syntax, handled entirely in `core/parse`:
+
+- jaxtyping annotations: `Float[Tensor, "b s d"]` → `shape` annotation
+  `{dims: ['b','s','d'], dtype: 'float'}` on the parameter symbol. The dim-string
+  grammar (names, ints, `*batch` variadics, `#broadcast`, `...`) is small and
+  documented; we parse it with a hand-rolled tokenizer. This feeds the
+  "given W ∈ ℝ^{d×k}" signature line directly — users who already annotate get rich
+  rendering for free, which doubles as an incentive to annotate.
+- Shape comments: `# (B, T, D)` trailing an assignment → same annotation payload.
+- einops/einsum pattern strings (`rearrange(x, 'b s d -> (b s) d')`,
+  `einsum("ij,jk->ik", …)`): the pattern *is* a shape declaration for operands and
+  result; we're parsing these strings for rendering anyway.
+
+All three normalize to the one `shape` annotation payload from §4.2 — declared,
+delegated, observed, and runtime facts are indistinguishable to renderers.
+
+**Tier 2 — Delegated (stretch S1a).** A **Pyright sidecar** (MIT-licensed, on npm; we
+spawn our own instance — we cannot read Pylance's results, different license) answers
+what we're currently guessing at with heuristics: *is this operand a
+Tensor/ndarray or a scalar? what dtype? what does this helper return?* That is exactly
+the `*` → `⊙` ambiguity in the risk table, upgraded from heuristic to fact. It will
+never give us dims (see above), and we don't ask it to. Interface: an
+`AnnotationProvider` plus one narrow `ClassFacts` query the translator may consult
+(`kindOf(expr) → tensor | scalar | unknown`), so the translator's dependency stays
+one function wide and the sidecar remains optional at runtime.
+
+**Tier 3 — Observed (stretch S1b, opt-in).** PyTorch's **FakeTensor / meta-device**
+machinery (what `torch.compile` uses) executes a function with fake tensors and
+yields exact shapes/dtypes/devices with no real compute. It beats every static
+analyzer ever written, but requires importing user code — so it runs as an explicit
+user action ("Trace shapes"), out of process, in the user's selected Python
+environment, emitting `shape|dtype|device` annotations with `origin: 'static'`
+semantics but observed provenance. This is also the dress rehearsal for the DAP
+provider: identical payloads, different transport.
+
+**One-step propagation cap.** Given ingested operand shapes and an op already in the
+§6.2 table, the translator may fill in the result shape (`(d×k)·(k,) → (d,)` is a
+table lookup — the table gains an optional `shapeRule` column). No fixpoint iteration,
+no interprocedural flow, no constraint solving. If a shape isn't derivable in one
+step from ingested facts, it renders as unknown. Mismatch *display* (red inner
+dimensions when one op's declared operands disagree) is a rendering byproduct of that
+lookup, not a diagnostic pass — we show the contradiction where it occurs and never
+chase it downstream. Users who want a real checker should run one; we render what
+theirs (or their annotations) declare.
+
 ---
 
 ## 7. Feature specs & acceptance criteria
@@ -525,7 +592,7 @@ Dependencies flow downward; M2–M4 have internal parallelism (hover vs panel).
 | M | Deliverable | Contents | Exit criterion |
 |---|---|---|---|
 | **M0** | Skeleton | Monorepo, esbuild bundling, LanguageClient↔server handshake, tree-sitter loading a Python file, CI (lint+test), hello-world hover | Hover shows raw statement text |
-| **M1** | Translator core | MathIR types, naming engine w/ heuristics + `# tex:`, expression table (§6.2 sans einsum), statement forms, `emit/` LaTeX profiles, golden-test harness | 30 golden cases pass, incl. attention & layernorm bodies |
+| **M1** | Translator core | MathIR types, naming engine w/ heuristics + `# tex:`, expression table (§6.2 sans einsum), statement forms, declared-shape ingestion (F8: jaxtyping, shape comments → signature lines), `emit/` LaTeX profiles, golden-test harness | 30 golden cases pass, incl. attention & layernorm bodies w/ jaxtyping-derived "given …" lines |
 | **M2** | Hover (F0) | MathJax server-side SVG, theming, preamble injection, failure fallback | F0 acceptance |
 | **M3** | Panel (F2) + CodeLens (F1) | Webview app, MathIR-JSON protocol, incremental patches, bidirectional sync, follow/pin | F1+F2 acceptance |
 | **M4** | Control flow (F6) + Selection (F3) | Reduction/recurrence/indexed-block tiers, cases, comprehensions, einsum, fallback discipline pass over corpus | F3+F6 acceptance; golden corpus ≥ 80 cases |
@@ -535,8 +602,10 @@ Dependencies flow downward; M2–M4 have internal parallelism (hover vs panel).
 
 ### Stretch (post-MVP, sequenced)
 
-S1 `StaticShapeProvider` (+ red-dimension diagnostics) → S2 `DapAnnotationProvider`
-(breakpoint shapes) → S3 value/stats badges → S4 trace PDF → S5 gradient flow.
+S1a `PyrightFactsProvider` (class/dtype facts; upgrades `*` disambiguation) →
+S1b `FakeTensorProvider` (opt-in observed shapes) + one-step propagation w/
+red-dimension mismatch display → S2 `DapAnnotationProvider` (breakpoint shapes) →
+S3 value/stats badges → S4 trace PDF → S5 gradient flow.
 
 ---
 
@@ -570,8 +639,9 @@ Concrete rules that keep the stretch goals cheap, enforceable in review *now*:
 - **Golden corpus (the backbone):** `core/test/corpus/*.py` + expected `.tex` /
   MathIR-JSON snapshots. Seed with real code: scaled-dot-product attention, layernorm,
   Adam step, Kalman filter, softmax/logsumexp, GRU cell, batched einsum ops, a messy
-  "real-world" function full of logging (fallback discipline). Every bug report
-  becomes a corpus case.
+  "real-world" function full of logging (fallback discipline), and jaxtyping-annotated
+  variants of the above (F8: signature lines + dim-string edge cases: `*batch`, `#`,
+  `...`, ints). Every bug report becomes a corpus case.
 - **Table-driven unit tests** for the op table (§6.2) and naming heuristics (§5) —
   one row, one test.
 - **Render smoke tests:** every golden `.tex` body must compile under MathJax without
@@ -590,13 +660,15 @@ Concrete rules that keep the stretch goals cheap, enforceable in review *now*:
 | Risk | Mitigation |
 |---|---|
 | Translation quality cliff — real code is messier than the corpus | Fallback discipline (§6.5) as a hard invariant; structured fallback-reason telemetry (local log) to prioritize table gaps; `# tex:` escape hatch |
-| `*` ambiguity (elementwise vs scalar) misleads users | Conservative default (`\odot` only when both operands traced to tensor constructors/params), config override, and hover always available to check a single line |
+| `*` ambiguity (elementwise vs scalar) misleads users | Conservative default (`\odot` only when both operands traced to tensor constructors/params or jaxtyping-annotated), config override, hover always available to check a single line; permanent fix is the Pyright sidecar (S1a) behind the one-function `ClassFacts` interface |
 | Symbol naming feels wrong → users bounce | Heuristics conservative; hint-diagnostics advertise directives; mapping file documented in README with a worked example |
 | MathJax macro/feature gaps vs real TeX (panel ≠ PDF) | Preamble is injected into both; CI smoke-compiles goldens under both renderers and diffs failures |
 | tectonic download friction (offline/proxy environments) | `latexmk` engine setting; clear error with manual-install docs; cache binary in globalStorage |
 | Panel perf on huge functions | Incremental typeset per equation ID; virtualize section list; hard cap with "function too large, use selection" notice |
 | Call resolution wrong across packages | Syntactic-only resolution, explicit "unresolved" styling, never guess across ambiguous imports |
-| Scope creep toward a type checker | §1 non-goals; shape inference stays a stretch provider, not a translator concern |
+| Scope creep toward a type checker | §6.6 doctrine: facts are ingested (declared/delegated/observed), never inferred beyond one-step table lookup; the graveyard of PyTea/ShapeFlow/tensor-annotations is the cautionary tale. Mismatch display is a rendering byproduct, never a diagnostic pass |
+| jaxtyping dim-string grammar drift (variadics, symbolic exprs) | Support the documented core (names, ints, `*var`, `#`, `...`); anything else renders the raw string in the signature line — same fallback discipline as §6.5 |
+| Pyright sidecar cost/availability (S1a) | Optional at runtime behind `ClassFacts`; translator must produce identical output minus disambiguation when absent (tested both ways) |
 
 ## 13. Open questions (decide by end of M1)
 

@@ -1,0 +1,103 @@
+{
+  "name": "mathlens",
+  "displayName": "MathLens",
+  "description": "Renders Python linear-algebra / PyTorch code as LaTeX mathematics — hover, live panel, and PDF export.",
+  "version": "0.0.1",
+  "private": true,
+  "publisher": "mathlens",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages"
+  ],
+  "main": "./dist/extension.cjs",
+  "activationEvents": [
+    "onLanguage:python"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "mathlens.viewAsMath",
+        "title": "MathLens: View as Math",
+        "category": "MathLens"
+      },
+      {
+        "command": "mathlens.renderSelection",
+        "title": "MathLens: Render Selection as Derivation",
+        "category": "MathLens"
+      },
+      {
+        "command": "mathlens.viewWorkflow",
+        "title": "MathLens: View Workflow as Math",
+        "category": "MathLens"
+      },
+      {
+        "command": "mathlens.exportPdf",
+        "title": "MathLens: Export PDF",
+        "category": "MathLens"
+      },
+      {
+        "command": "mathlens.copyLatex",
+        "title": "MathLens: Copy LaTeX",
+        "category": "MathLens"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "mathlens.renderSelection",
+          "when": "editorHasSelection && editorLangId == python",
+          "group": "mathlens"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "MathLens",
+      "properties": {
+        "mathlens.panel.debounceMs": {
+          "type": "number",
+          "default": 250,
+          "description": "Debounce interval (ms) for live panel re-renders after edits."
+        },
+        "mathlens.panel.follow": {
+          "type": "boolean",
+          "default": true,
+          "description": "Panel follows the cursor's enclosing function (uncheck to require pinning)."
+        },
+        "mathlens.pdf.engine": {
+          "type": "string",
+          "enum": [
+            "tectonic",
+            "latexmk"
+          ],
+          "default": "tectonic",
+          "description": "TeX engine for PDF export. 'tectonic' is auto-downloaded; 'latexmk' uses the system TeX installation."
+        },
+        "mathlens.pdf.tectonicPath": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to the tectonic executable. Empty: use a bootstrapped copy in global storage or resolve from PATH."
+        },
+        "mathlens.render.displayScale": {
+          "type": "number",
+          "default": 1,
+          "description": "Scale factor for rendered math in hover and panel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mathlens/core": "0.0.1",
+    "vscode-languageclient": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.91.0"
+  }
+}

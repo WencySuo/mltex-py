@@ -1,0 +1,16 @@
+{
+  "name": "@mathlens/webview",
+  "version": "0.0.1",
+  "private": true,
+  "description": "MathLens panel UI — renders MathIR JSON with MathJax; bundled into packages/client/media/webview.js.",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@mathlens/core": "0.0.1",
+    "mathjax-full": "^3.2.2"
+  }
+}

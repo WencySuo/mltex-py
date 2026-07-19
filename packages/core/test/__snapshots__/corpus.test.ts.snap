@@ -1,0 +1,488 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`golden snapshots > adam.py emits stable LaTeX 1`] = `
+"\\section*{adam\\_step}
+\\hypertarget{adam:step:section:::0-c832637e}{}
+One Adam optimizer step.
+
+\\[ \\text{given } \\theta,\\; g,\\; m,\\; v,\\; \\mathit{lr},\\; \\beta_1,\\; \\beta_2,\\; \\varepsilon,\\; t \\]
+\\begin{align*}
+  m &= \\beta_1 \\cdot m + \\left( 1 - \\beta_1 \\right) \\cdot g \\\\
+  v &= \\beta_2 \\cdot v + \\left( 1 - \\beta_2 \\right) \\cdot \\left( g \\cdot g \\right) \\\\
+  \\hat{m} &= \\frac{m}{\\left( 1 - \\beta_1^{t} \\right)} \\\\
+  \\hat{v} &= \\frac{v}{\\left( 1 - \\beta_2^{t} \\right)} \\\\
+  \\theta &= \\theta - \\frac{\\mathit{lr} \\cdot \\hat{m}}{\\left( \\sqrt{\\hat{v}} + \\varepsilon \\right)} \\\\
+  \\operatorname{adam\\_step}\\left(  \\right) &= \\theta
+\\end{align*}
+
+\\section*{sgd\\_momentum}
+\\hypertarget{sgd:momentum:section:::0-63231729}{}
+\\[ \\text{given } \\theta,\\; g,\\; v,\\; \\mathit{lr},\\; \\mu \\]
+\\begin{align*}
+  v &= \\mu \\cdot v + g \\\\
+  \\theta &= \\theta - \\mathit{lr} \\cdot v \\\\
+  \\operatorname{sgd\\_momentum}\\left(  \\right) &= \\theta
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > attention.py emits stable LaTeX 1`] = `
+"\\section*{scaled\\_dot\\_product\\_attention}
+\\hypertarget{scaled:dot:product:attention:section:::0-7adbcda7}{}
+Scaled dot-product attention.
+
+\\[ \\text{given } Q,\\; K,\\; V,\\; d \\]
+\\begin{align*}
+  \\mathit{scores} &= \\frac{Q K^{\\top}}{\\sqrt{d}} \\\\
+  A &= \\operatorname{softmax}\\left( \\mathit{scores} \\right) \\\\
+  \\mathit{out} &= A V \\\\
+  \\operatorname{scaled\\_dot\\_product\\_attention}\\left(  \\right) &= \\mathit{out}
+\\end{align*}
+
+\\section*{attention\\_jaxtyped}
+\\hypertarget{attention:jaxtyped:section:::0-c781e84c}{}
+Attention with jaxtyping-declared shapes.
+
+\\[ \\text{given } Q \\in \\mathbb{R}^{b \\times s \\times d},\\; K \\in \\mathbb{R}^{b \\times s \\times d},\\; V \\in \\mathbb{R}^{b \\times s \\times d} \\]
+\\begin{align*}
+  \\mathit{scores} &= \\frac{Q K^{\\top}}{\\sqrt{64}}\\quad \\scriptstyle (b \\times s \\times s) \\\\
+  A &= \\operatorname{softmax}\\left( \\mathit{scores} \\right) \\\\
+  \\mathit{out} &= A V \\\\
+  \\operatorname{attention\\_jaxtyped}\\left(  \\right) &= \\mathit{out}
+\\end{align*}
+
+\\section*{masked\\_attention}
+\\hypertarget{masked:attention:section:::0-a6c55e22}{}
+\\[ \\text{given } Q,\\; K,\\; V,\\; \\mathit{mask},\\; d \\]
+\\begin{align*}
+  \\mathit{scores} &= \\frac{Q K^{\\top}}{\\sqrt{d}} \\\\
+  \\mathit{scores} &= \\mathit{scores} + \\mathit{mask} \\\\
+  \\tilde{A} &= \\operatorname{softmax}\\left( \\mathit{scores} \\right) \\\\
+  \\operatorname{masked\\_attention}\\left(  \\right) &= \\tilde{A} V
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > control_flow.py emits stable LaTeX 1`] = `
+"\\section*{relu\\_manual}
+\\hypertarget{relu:manual:section:::0-a54c19d3}{}
+\\[ \\text{given } x \\]
+\\begin{align*}
+  y = \\begin{cases} x & x > 0 \\\\ 0 & \\text{otherwise} \\end{cases}
+\\end{align*}
+\\begin{align*}
+  \\operatorname{relu\\_manual}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{sign}
+\\hypertarget{sign:section:::0-c3709a29}{}
+\\[ \\text{given } x \\]
+\\begin{align*}
+  s = \\begin{cases} 1 & x > 0 \\\\ -1 & x < 0 \\\\ 0 & \\text{otherwise} \\end{cases}
+\\end{align*}
+\\begin{align*}
+  \\operatorname{sign}\\left(  \\right) &= s
+\\end{align*}
+
+\\section*{accumulate}
+\\hypertarget{accumulate:section:::0-d9613a28}{}
+\\[ \\text{given } \\mathit{xs},\\; N \\]
+\\begin{align*}
+  \\mathit{total} &= \\sum_{i=1}^{N} \\mathit{xs}_i \\\\
+  \\operatorname{accumulate}\\left(  \\right) &= \\mathit{total}
+\\end{align*}
+
+\\section*{product}
+\\hypertarget{product:section:::0-89355eb1}{}
+\\[ \\text{given } \\mathit{xs},\\; N \\]
+\\begin{align*}
+  p &= \\prod_{i=1}^{N} \\mathit{xs}_i \\\\
+  \\operatorname{product}\\left(  \\right) &= p
+\\end{align*}
+
+\\section*{running\\_max}
+\\hypertarget{running:max:section:::0-85f79206}{}
+\\[ \\text{given } \\mathit{xs} \\]
+\\begin{align*}
+  m &= \\max_{x \\in \\mathit{xs}} x \\\\
+  \\operatorname{running\\_max}\\left(  \\right) &= m
+\\end{align*}
+
+\\section*{collect}
+\\hypertarget{collect:section:::0-db2cde02}{}
+\\[ \\text{given } N \\]
+\\begin{align*}
+  \\mathit{ys} &= \\left( i \\cdot i \\right)_{i = \\left( 1, \\dots, N \\right)} \\\\
+  \\operatorname{collect}\\left(  \\right) &= \\mathit{ys}
+\\end{align*}
+
+\\section*{comprehension}
+\\hypertarget{comprehension:section:::0-101a2f24}{}
+\\[ \\text{given } \\mathit{xs} \\]
+\\begin{align*}
+  \\mathit{ys} &= \\left( x \\cdot 2 \\right)_{x \\in \\mathit{xs}} \\\\
+  \\operatorname{comprehension}\\left(  \\right) &= \\mathit{ys}
+\\end{align*}
+
+\\section*{gradient\\_descent}
+\\hypertarget{gradient:descent:section:::0-a91bf911}{}
+\\[ \\text{given } \\theta,\\; \\mathit{lr},\\; \\varepsilon,\\; g \\]
+\\[ \\text{while } \\lVert g \\rVert > \\varepsilon: \\]
+\\begin{quote}
+  \\begin{align*}
+    \\theta &= \\theta - \\mathit{lr} \\cdot g
+  \\end{align*}
+\\end{quote}
+\\begin{align*}
+  \\operatorname{gradient\\_descent}\\left(  \\right) &= \\theta
+\\end{align*}
+
+\\section*{general\\_loop}
+\\hypertarget{general:loop:section:::0-86386bb3}{}
+\\[ \\text{given } x,\\; T \\]
+\\[ \\text{for } t = 1, \\dots, T: \\]
+\\begin{quote}
+  \\begin{align*}
+    a &= x_t + 1 \\\\
+    b &= a \\cdot 2 \\\\
+    c &= b - a
+  \\end{align*}
+\\end{quote}
+\\begin{align*}
+  \\operatorname{general\\_loop}\\left(  \\right) &= c
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > einsum_ops.py emits stable LaTeX 1`] = `
+"\\section*{matmul\\_einsum}
+\\hypertarget{matmul:einsum:section:::0-29bc11c2}{}
+\\[ \\text{given } A,\\; B \\]
+\\begin{align*}
+  C &= \\sum_{j} A_{i,j} B_{j,k}\\quad \\scriptstyle (i \\times k) \\\\
+  \\operatorname{matmul\\_einsum}\\left(  \\right) &= C
+\\end{align*}
+
+\\section*{batched\\_matmul}
+\\hypertarget{batched:matmul:section:::0-312213f8}{}
+\\[ \\text{given } A,\\; B \\]
+\\begin{align*}
+  C &= \\sum_{j} A_{b,i,j} B_{b,j,k}\\quad \\scriptstyle (b \\times i \\times k) \\\\
+  \\operatorname{batched\\_matmul}\\left(  \\right) &= C
+\\end{align*}
+
+\\section*{trace}
+\\hypertarget{trace:section:::0-5ab40fa7}{}
+\\[ \\text{given } A \\]
+\\begin{align*}
+  t &= \\sum_{i} A_{i,i} \\\\
+  \\operatorname{trace}\\left(  \\right) &= t
+\\end{align*}
+
+\\section*{outer\\_product}
+\\hypertarget{outer:product:section:::0-2d58654d}{}
+\\[ \\text{given } a,\\; b \\]
+\\begin{align*}
+  M &= a_i b_j\\quad \\scriptstyle (i \\times j) \\\\
+  \\operatorname{outer\\_product}\\left(  \\right) &= M
+\\end{align*}
+
+\\section*{bilinear\\_form}
+\\hypertarget{bilinear:form:section:::0-15012165}{}
+\\[ \\text{given } x,\\; A,\\; y \\]
+\\begin{align*}
+  s &= \\sum_{i} \\left( \\sum_{j} x_i A_{i,j} y_j \\right) \\\\
+  \\operatorname{bilinear\\_form}\\left(  \\right) &= s
+\\end{align*}
+
+\\section*{attention\\_scores\\_einsum}
+\\hypertarget{attention:scores:einsum:section:::0-da64695a}{}
+\\[ \\text{given } Q,\\; K \\]
+\\begin{align*}
+  S &= \\sum_{d} Q_{b,q,d} K_{b,k,d}\\quad \\scriptstyle (b \\times q \\times k) \\\\
+  \\operatorname{attention\\_scores\\_einsum}\\left(  \\right) &= S
+\\end{align*}
+
+\\section*{implicit\\_output}
+\\hypertarget{implicit:output:section:::0-847bf91f}{}
+\\[ \\text{given } A,\\; B \\]
+\\begin{align*}
+  C &= \\sum_{j} A_{i,j} B_{j,k}\\quad \\scriptstyle (i \\times k) \\\\
+  \\operatorname{implicit\\_output}\\left(  \\right) &= C
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > gru.py emits stable LaTeX 1`] = `
+"\\section*{gru\\_cell}
+\\hypertarget{gru:cell:section:::0-7eb94d5d}{}
+One GRU cell step.
+
+\\[ \\text{given } x,\\; h,\\; W_z,\\; U_z,\\; W_r,\\; U_r,\\; W_h,\\; U_h \\]
+\\begin{align*}
+  z &= \\sigma\\left( W_z x + U_z h \\right) \\\\
+  r &= \\sigma\\left( W_r x + U_r h \\right) \\\\
+  \\tilde{h} &= \\tanh\\left( W_h x + U_h \\left( r \\cdot h \\right) \\right) \\\\
+  h &= \\left( 1 - z \\right) \\cdot h + z \\cdot \\tilde{h} \\\\
+  \\operatorname{gru\\_cell}\\left(  \\right) &= h
+\\end{align*}
+
+\\section*{gru\\_sequence}
+\\hypertarget{gru:sequence:section:::0-78581f72}{}
+Recurrence over the sequence (tier-2).
+
+\\[ \\text{given } \\mathit{xs},\\; h,\\; W,\\; U,\\; T \\]
+\\begin{align*}
+  h_t &= \\tanh\\left( W \\mathit{xs}_t + U h_{t - 1} \\right), \\quad t = \\left( 1, \\dots, T \\right) \\\\
+  \\operatorname{gru\\_sequence}\\left(  \\right) &= h
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > jaxtyping_variants.py emits stable LaTeX 1`] = `
+"\\section*{variadic\\_batch}
+\\hypertarget{variadic:batch:section:::0-78caf448}{}
+Variadic batch dims (*batch edge case).
+
+\\[ \\text{given } x \\in \\mathbb{R}^{\\text{*batch} \\times \\text{seq} \\times \\text{dim}} \\]
+\\begin{align*}
+  y &= \\mathbb{E}\\left[ x \\right] \\\\
+  \\operatorname{variadic\\_batch}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{broadcast\\_dims}
+\\hypertarget{broadcast:dims:section:::0-87cb59eb}{}
+Broadcastable dims (\\# edge case).
+
+\\[ \\text{given } m \\in \\mathbb{Z}^{\\text{\\#b} \\times s},\\; x \\in \\mathbb{R}^{b \\times s} \\]
+\\begin{align*}
+  y &= x \\odot x \\\\
+  \\operatorname{broadcast\\_dims}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{ellipsis\\_dims}
+\\hypertarget{ellipsis:dims:section:::0-f6f321c1}{}
+Bare ellipsis dims.
+
+\\[ \\text{given } z \\in \\mathbb{Z}^{\\dots} \\]
+\\begin{align*}
+  s &= \\sum z \\\\
+  \\operatorname{ellipsis\\_dims}\\left(  \\right) &= s
+\\end{align*}
+
+\\section*{int\\_dims}
+\\hypertarget{int:dims:section:::0-871042a5}{}
+Literal integer dims.
+
+\\[ \\text{given } x \\in \\mathbb{R}^{b \\times 128 \\times 4} \\]
+\\begin{align*}
+  y &= x + 1 \\\\
+  \\operatorname{int\\_dims}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{mixed\\_everything}
+\\hypertarget{mixed:everything:section:::0-4e90a8ed}{}
+\\[ \\text{given } q \\in \\mathbb{R}^{\\text{*b} \\times \\text{heads} \\times s \\times 64},\\; \\mathit{mask} \\in \\mathbb{Z}^{\\text{\\#b} \\times 1 \\times s \\times s},\\; \\mathit{scale} : \\texttt{float} \\]
+\\begin{align*}
+  \\mathit{scores} &= q q^{\\top} \\cdot \\mathit{scale} \\\\
+  \\operatorname{mixed\\_everything}\\left(  \\right) &= \\mathit{scores}
+\\end{align*}
+
+\\section*{unparseable\\_dims}
+\\hypertarget{unparseable:dims:section:::0-a3f6433a}{}
+Symbolic expression dims → raw string fallback (§6.5).
+
+\\[ \\text{given } x : \\texttt{dim-1 d} \\]
+\\begin{align*}
+  y &= x + 1 \\\\
+  \\operatorname{unparseable\\_dims}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{shape\\_comments}
+\\hypertarget{shape:comments:section:::0-bcc206b6}{}
+\\[ \\text{given } x,\\; w \\]
+\\begin{align*}
+  h &= x w\\quad \\scriptstyle (B \\times T \\times D) \\\\
+  z &= \\sum_{-1} h\\quad \\scriptstyle (B \\times T) \\\\
+  \\operatorname{shape\\_comments}\\left(  \\right) &= z
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > kalman.py emits stable LaTeX 1`] = `
+"\\section*{kalman\\_predict}
+\\hypertarget{kalman:predict:section:::0-c5e51640}{}
+Kalman filter prediction step.
+
+\\[ \\text{given } x,\\; P,\\; F,\\; Q \\]
+\\begin{align*}
+  \\hat{x} &= F x \\\\
+  \\hat{P} &= F P F^{\\top} + Q \\\\
+  \\operatorname{kalman\\_predict}\\left(  \\right) &= \\left( \\hat{x}, \\hat{P} \\right)
+\\end{align*}
+
+\\section*{kalman\\_update}
+\\hypertarget{kalman:update:section:::0-25c4a100}{}
+Kalman filter measurement update.
+
+\\[ \\text{given } \\hat{x},\\; \\hat{P},\\; z,\\; H,\\; R \\]
+\\begin{align*}
+  y &= z - H \\hat{x} \\\\
+  S &= H \\hat{P} H^{\\top} + R \\\\
+  K &= \\hat{P} H^{\\top} S^{-1} \\\\
+  x &= \\hat{x} + K y \\\\
+  P &= \\hat{P} - K H \\hat{P} \\\\
+  \\operatorname{kalman\\_update}\\left(  \\right) &= \\left( x, P \\right)
+\\end{align*}
+
+\\section*{kalman\\_filter}
+\\hypertarget{kalman:filter:section:::0-63ef4871}{}
+Full filter over a sequence: recurrence over t.
+
+\\[ \\text{given } x,\\; P,\\; F,\\; Q,\\; H,\\; R,\\; \\mathit{zs},\\; T \\]
+\\begin{align*}
+  x_t &= F x_{t - 1}, \\quad t = \\left( 1, \\dots, T \\right) \\\\
+  P_t &= F P_{t - 1} F^{\\top} + Q \\\\
+  \\operatorname{kalman\\_filter}\\left(  \\right) &= \\left( x, P \\right)
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > layernorm.py emits stable LaTeX 1`] = `
+"\\section*{layernorm}
+\\hypertarget{layernorm:section:::0-a7038c35}{}
+Layer normalization.
+
+\\[ \\text{given } x,\\; \\gamma,\\; \\beta,\\; \\varepsilon \\]
+\\begin{align*}
+  \\mu &= \\mathbb{E}\\left[ x \\right] \\\\
+  \\mathit{var} &= \\operatorname{Var}\\left[ x \\right] \\\\
+  \\hat{x} &= \\frac{\\left( x - \\mu \\right)}{\\sqrt{\\mathit{var} + \\varepsilon}} \\\\
+  y &= \\gamma \\cdot \\hat{x} + \\beta \\\\
+  \\operatorname{layernorm}\\left(  \\right) &= y
+\\end{align*}
+
+\\section*{layernorm\\_jaxtyped}
+\\hypertarget{layernorm:jaxtyped:section:::0-88daa815}{}
+\\[ \\text{given } x \\in \\mathbb{R}^{b \\times t \\times d},\\; \\gamma \\in \\mathbb{R}^{d},\\; \\beta \\in \\mathbb{R}^{d},\\; \\varepsilon : \\texttt{float} \\]
+\\begin{align*}
+  \\mu &= \\mathbb{E}\\left[ x \\right] \\\\
+  \\sigma_2 &= \\operatorname{Var}\\left[ x \\right] \\\\
+  \\hat{x} &= \\frac{\\left( x - \\mu \\right)}{\\sqrt{\\sigma_2 + \\varepsilon}} \\\\
+  \\operatorname{layernorm\\_jaxtyped}\\left(  \\right) &= \\gamma \\cdot \\hat{x} + \\beta
+\\end{align*}
+
+\\section*{rmsnorm}
+\\hypertarget{rmsnorm:section:::0-ab32c5a8}{}
+\\[ \\text{given } x,\\; w,\\; \\varepsilon \\]
+\\begin{align*}
+  \\mathit{ms} &= \\mathbb{E}\\left[ \\left( x \\cdot x \\right) \\right] \\\\
+  \\bar{x} &= \\frac{x}{\\sqrt{\\mathit{ms} + \\varepsilon}} \\\\
+  \\operatorname{rmsnorm}\\left(  \\right) &= w \\cdot \\bar{x}
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > messy.py emits stable LaTeX 1`] = `
+"\\section*{messy\\_training\\_step}
+\\hypertarget{messy:training:step:section:::0-600fe487}{}
+A realistic function full of logging and plumbing (§6.5 discipline).
+
+\\[ \\text{given } \\mathit{model},\\; \\mathit{batch},\\; \\mathit{optimizer},\\; \\mathit{device},\\; \\mathit{step} \\]
+\\begin{verbatim}
+logger.info("starting step %d", step)
+\\end{verbatim}
+\\begin{align*}
+  x &= \\mathit{batch}_{\\text{input}} \\\\
+  y &= \\mathit{batch}_{\\text{target}}
+\\end{align*}
+\\begin{verbatim}
+optimizer.zero_grad()
+\\end{verbatim}
+\\begin{align*}
+  \\mathit{logits} &= \\operatorname{model}\\left( x \\right) \\\\
+  \\mathit{probs} &= \\operatorname{softmax}\\left( \\mathit{logits} \\right) \\\\
+  \\mathit{loss} &= -\\mathbb{E}\\left[ \\log\\left( \\mathit{probs}_y \\right) \\right]
+\\end{align*}
+\\begin{verbatim}
+loss.backward()
+optimizer.step()
+\\end{verbatim}
+\\[ \\text{if } \\mathit{step} \\bmod 100 = 0: \\]
+\\begin{quote}
+  \\begin{verbatim}
+logger.info("loss=%f", loss.item())
+  \\end{verbatim}
+\\end{quote}
+\\begin{align*}
+  z &= \\mathit{logits} \\\\
+  \\mathit{norm} &= \\lVert z \\rVert \\\\
+  \\operatorname{messy\\_training\\_step}\\left(  \\right) &= \\left( \\mathit{loss}, \\mathit{norm} \\right)
+\\end{align*}
+
+\\section*{half\\_translatable}
+\\hypertarget{half:translatable:section:::0-cc079243}{}
+\\[ \\text{given } x,\\; w,\\; \\mathit{cfg} \\]
+\\begin{verbatim}
+print("debug", cfg)
+\\end{verbatim}
+\\begin{align*}
+  h &= x w
+\\end{align*}
+\\begin{verbatim}
+h.record_stats(reason="because")
+\\end{verbatim}
+\\begin{align*}
+  y &= \\tanh\\left( h \\right) \\\\
+  \\operatorname{half\\_translatable}\\left(  \\right) &= y
+\\end{align*}
+"
+`;
+
+exports[`golden snapshots > softmax_logsumexp.py emits stable LaTeX 1`] = `
+"\\section*{softmax}
+\\hypertarget{softmax:section:::0-37b6365a}{}
+Numerically stable softmax.
+
+\\[ \\text{given } z \\]
+\\begin{align*}
+  m &= \\max z \\\\
+  e &= \\exp\\left( z - m \\right) \\\\
+  \\operatorname{softmax}\\left(  \\right) &= \\frac{e}{\\sum e}
+\\end{align*}
+
+\\section*{logsumexp}
+\\hypertarget{logsumexp:section:::0-6b2249d0}{}
+\\[ \\text{given } z \\]
+\\begin{align*}
+  m &= \\max z \\\\
+  \\operatorname{logsumexp}\\left(  \\right) &= m + \\log\\left( \\sum \\exp\\left( z - m \\right) \\right)
+\\end{align*}
+
+\\section*{cross\\_entropy}
+\\hypertarget{cross:entropy:section:::0-34e76266}{}
+\\[ \\text{given } \\mathit{logits},\\; \\mathit{target} \\]
+\\begin{align*}
+  \\mathit{lse} &= \\operatorname{logsumexp}\\left( \\mathit{logits} \\right) \\\\
+  \\operatorname{cross\\_entropy}\\left(  \\right) &= \\mathit{lse} - \\mathit{logits}_{\\mathit{target}}
+\\end{align*}
+
+\\section*{softmax\\_loop}
+\\hypertarget{softmax:loop:section:::0-429c232d}{}
+Softmax denominator via accumulation loop (tier-1 reduction).
+
+\\[ \\text{given } z,\\; N \\]
+\\begin{align*}
+  \\mathit{total} &= \\sum_{i=1}^{N} \\exp\\left( z_i \\right) \\\\
+  \\operatorname{softmax\\_loop}\\left(  \\right) &= \\mathit{total}
+\\end{align*}
+
+\\section*{sum\\_generator}
+\\hypertarget{sum:generator:section:::0-13d18d63}{}
+\\[ \\text{given } z,\\; N \\]
+\\begin{align*}
+  s &= \\sum_{i=1}^{N} \\exp\\left( z_i \\right) \\\\
+  \\operatorname{sum\\_generator}\\left(  \\right) &= s
+\\end{align*}
+"
+`;
